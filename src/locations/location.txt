@@ -1,0 +1,2 @@
+Each location must follow this structure
+Continent - Country - City - Municipality

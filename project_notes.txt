@@ -1,0 +1,6 @@
+Differents kind of real estate
+Residential - (appartment, duplex, townhouse, condominium)
+Commercial - (shopping center, office, restaurant, hotel, medical facility, school, semetery, sport arena)
+Land - 
+Industrial - (warehouse, factory)
+Special Purpose - ( public schools, government building, place of worship, semeteries, public hospitals)
