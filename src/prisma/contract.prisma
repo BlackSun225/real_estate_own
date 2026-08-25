@@ -1,0 +1,268 @@
+// use prisma-next
+
+/*model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  username  String?
+  name      String?
+  posts     Post[]
+  createdAt DateTime @default(now())
+  updatedAt temporal.updatedAt()
+}
+
+model Post {
+  id        Int      @id @default(autoincrement())
+  title     String
+  content   String?
+  author    User     @relation(fields: [authorId], references: [id])
+  authorId  Int
+  createdAt DateTime @default(now())
+  updatedAt temporal.updatedAt()
+}*/
+
+enum Role_name {
+    @@type("pg/text@1")
+    Superadmin = "superadmin"
+    Admin = "admin"
+    Manager = "manager"
+}
+
+model Role {
+  id            Uuid @id @default(uuid())
+  name          Role_name
+  users         User[]
+  createdAt     DateTime  @default(now())
+}
+
+model User {
+  id            Uuid @id @default(uuid())
+  firstname     String
+  lastname      String
+  email         String
+  roleId        String
+  role          Role    @relation(fields: [roleId], references: [id])
+  createdAt     DateTime  @default(now())
+}
+
+model Continent {
+  id            Uuid  @id @default(uuid())
+  name          String
+  comment       String
+  countries     Country[]
+  createdAt     DateTime @default(now())
+}
+continent.createdBy > user.id
+
+model Country {
+  id            Uuid  @id @default(uuid())
+  name          String
+  comment       String
+  continentId   Uuid
+  continent     Continent  @relation(fields: [continentId], references: [id])
+  createdAt     DateTime  @default(now())
+}
+
+model Municipality {
+  id            Uuid  @id @default(uuid())
+  name          String
+  comment       String
+  countryId     Uuid
+  country       Country @relation(fields: [countryId], references: [id])
+  createdAt     DateTime  @default(now())
+  createdBy     String
+}
+
+enum Property_type_enum {
+    @@type("pg/text@1")
+    Residential = "residential"
+    Commercial  = "commercial"
+    Industrial  = "industrial"
+    Land        = "land"
+    Special     = "special"
+}
+model Property_type {
+  id            Uuid  @id @default(uuid())
+  name          Property_type_enum
+  description   String
+  categories    Property_category[]
+  createdAt     DateTime  @default(now())
+  createdBy     String
+}
+
+model Property_category {
+  id            Uuid  @id @default(uuid())
+  name          String
+  description   String
+  typeId        Uuid
+  type          Property_type   @relation(fields: [typeId], references: [id])
+  properties    Property[]
+  sub_properties    Sub_property[]
+  createdAt     DateTime  @default(now())
+  createdBy     String
+}
+
+enum Property_status {
+    @@type("pg/text@1")
+    Available   =   "available"
+    Locked      =   "locked"
+    Rented      =   "rented"
+    Sold        =   "sold"
+}
+model Property {
+  id            Uuid  @id @default(uuid())
+  name          String
+  area          String
+  status        Property_status
+  rents         Rent[]
+  bookings      Booking[]
+  categoryId    String
+  category      Property_category   @relation(fields: [categoryId], references: [id])
+  municipalityId    String
+  municipality      Municipality    @relation(fields: [municipality], references: [id])
+  sub_properties    Sub_property[]
+  createdAt     DateTime  @default(now())
+}
+
+model Sub_property { 
+  id            Uuid  @id @default(uuid())
+  name          String
+  rents         Rent[]
+  bookings      Booking[]
+  categoryId    String
+  category      Property_category   @relation(fields: [categoryId], references: [id])
+  propertyId    Uuid
+  property      Property    @relation(fields: [propertyId], references: [id])
+  createdAt     DateTime  @default(now())
+}
+
+model Customer {
+  id            Uuid  @id @default(uuid())
+  rents         Rent[]
+  bookings      Booking[]
+  createdAt     DateTime  @default(now())
+}
+
+model Customer_details {
+  id            Uuid  @id @default(uuid())
+  customerId    Uuid
+  customer      Customer    @relation(fields: [customerId], references: [id])
+  firstname     String
+  firstname_hash    String
+  lastname      String
+  lastname_hash     String
+  email         String
+  email_hash    String
+  contact       String
+  contact_hash  String
+  gender        String
+  gender_hash   String
+  document_number  Uuid
+  logs          Customer_details_log[]
+  updatedAt     timeStamp
+  createdAt     DateTime  @default(now())
+} 
+
+model Customer_details_log {
+  prev_data     Json
+  new_data      Json
+  customer_detailsId  Uuid
+  customer_details    Customer_details  @relation(fields: [customer_detailsId], references: [id])  
+  createdAt     DateTime  @default(now())
+  user_data     Json    //data of the user who registers the log
+}
+
+model Password {
+  id            Uuid  @id @default(uuid())
+  value         String
+  userId        Uuid    @unique
+  user          User    @relation(fields: [userId], references: [id])
+  customerId    Uuid    @unique
+  customer      Customer    @relation(fields: [customerId], references: [id])
+  logs          Password_logs[]
+  createdAt     DateTime  @default(now())
+}
+
+model Password_logs {
+  passwordId    Uuid
+  password      Password    @relation(fields: [passwordId], references: [id])
+  prev_data     String
+  new_data      String
+  createdAt     DateTime  @default(now())
+}
+
+
+
+//add a scoring for customer so we know who pays well and who we must follow, reward, leave or block
+//the app should send email, whatsapp, telegram or sms alerts
+//we must know for each property who rent, rented, bought it, for each registered customer we will know how much he paid, have to pay, at which frequency
+enum Rent_status {
+    @@type("pg/text@1")
+    Active  =   "active"
+    Inactive    =   "inactive"
+}
+model Rent { //for rent
+  id            Uuid  @id @default(uuid())
+  customerId    Uuid
+  customer      Customer    @relation(fields: [customerId], references: [id])
+  propertyId    Uuid
+  property      Property    @relation(fields: [propertyId], references: [id])
+  sub_propertyId  Uuid
+  sub_property  Sub_property    @relation(fields: [sub_propertyId], references: [id])
+  status        Rent_status
+  comment       String
+  start         DateTime
+  end           DateTime
+  createdAt     DateTime  @default(now())
+}
+
+enum Booking_status {
+    Active  =   "active"
+    Canceled    =   "canceled"
+    Inactive    =   "inactive"
+    Scheduled   =   "scheduled"
+}
+model Booking { //for booking
+  id            Uuid  @id @default(uuid())
+  customerId    Uuid
+  customer      Customer    @relation(fields: [customerId], references: [id])
+  propertyId    Uuid
+  property      Property    @relation(fields: [propertyId], references: [id])
+  sub_propertyId  Uuid
+  sub_property  Sub_property    @relation(fields: [sub_propertyId], references: [id])
+  status        Booking_status 
+  comment       String
+  start         DateTime
+  end           DateTime
+  createdAt     DateTime
+  createdBy     DateTime  @default(now())
+}
+
+model Logs {
+  id            Uuid  @id @default(uuid())
+  user_data     Json //the data of the user who registers the logs
+  prev_data     Json
+  new_data      Json
+  countryId     Uuid
+  country   Country @relation(fields: [countryId], references: [id])
+  municipalityId  Uuid
+  municipality   Municipaliy @relation(fields: [municipalityId], references: [id])
+  customerId  Uuid
+  customer   Customer @relation(fields: [customerId], references: [id])
+  propertyId  Uuid
+  property   Property @relation(fields: [propertyId], references: [id])
+  sub_propertyId    Uuid
+  sub_property   Sub_property @relation(fields: [sub_propertyId], references: [id])
+  rentId   Uuid
+  rent   Rent @relation(fields: [rentId], references: [id])
+  bookingId   Uuid
+  booking   Booking @relation(fields: [bookingId], references: [id])
+  property_typeId   Uuid
+  property_type   Property_type @relation(fields: [property_typeId], references: [id])
+  property_categoryId   Uuid
+  property_category   Property_category @relation(fields: [property_categoryId], references: [id])
+  userId    Uuid
+  user   User @relation(fields: [userId], references: [id])
+  roleId    Uuid
+  role      Role    @relation(fields: [roleId], references: [id]) 
+  createdAt   DateTime  @default(now())
+}
