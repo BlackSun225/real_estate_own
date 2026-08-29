@@ -1,0 +1,275 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+
+// use prisma-next
+
+enum Role_name {
+    Superadmin
+    Admin
+    Manager
+}
+
+model Role {
+  id            String @id @default(uuid())
+  name          Role_name
+  users         User[]
+  logs          Logs[]
+  createdAt     DateTime  @default(now())
+}
+
+model User {
+  id            String @id @default(uuid())
+  firstname     String
+  lastname      String
+  email         String
+  roleId        String
+  role          Role    @relation(fields: [roleId], references: [id])
+  password      Password?
+  logs          Logs[]
+  createdAt     DateTime  @default(now())
+}
+
+model Continent {
+  id            String  @id @default(uuid())
+  name          String
+  comment       String
+  countries     Country[]
+  createdAt     DateTime @default(now())
+}
+
+model Country {
+  id            String  @id @default(uuid())
+  name          String
+  comment       String
+  continentId   String
+  continent     Continent  @relation(fields: [continentId], references: [id])
+  municipalities  Municipality[]
+  createdAt     DateTime  @default(now())
+  logs          Logs[]
+}
+
+model Municipality {
+  id            String  @id @default(uuid())
+  name          String
+  comment       String
+  countryId     String
+  country       Country @relation(fields: [countryId], references: [id])
+  properties    Property[]
+  createdAt     DateTime  @default(now())
+  createdBy     String
+  logs          Logs[]
+}
+
+enum Property_type_enum {
+    Residential 
+    Commercial  
+    Industrial  
+    Land        
+    Special     
+}
+model Property_type {
+  id            String  @id @default(uuid())
+  name          Property_type_enum
+  description   String
+  categories    Property_category[]
+  logs          Logs[]
+  createdAt     DateTime  @default(now())
+  createdBy     String
+}
+
+model Property_category {
+  id            String  @id @default(uuid())
+  name          String
+  description   String
+  typeId        String
+  type          Property_type   @relation(fields: [typeId], references: [id])
+  properties    Property[]
+  sub_properties    Sub_property[]
+  logs          Logs[]
+  createdAt     DateTime  @default(now())
+  createdBy     String
+}
+
+enum Property_status {
+    Available   
+    Locked      
+    Rented      
+    Sold        
+}
+model Property {
+  id            String  @id @default(uuid())
+  name          String
+  area          String
+  status        Property_status
+  rents         Rent[]
+  bookings      Booking[]
+  categoryId    String
+  category      Property_category   @relation(fields: [categoryId], references: [id])
+  municipalityId    String
+  municipality      Municipality    @relation(fields: [municipalityId], references: [id])
+  sub_properties    Sub_property[]
+  createdAt     DateTime  @default(now())
+  logs          Logs[]
+}
+
+model Sub_property { 
+  id            String  @id @default(uuid())
+  name          String
+  rents         Rent[]
+  bookings      Booking[]
+  categoryId    String
+  category      Property_category   @relation(fields: [categoryId], references: [id])
+  propertyId    String
+  property      Property    @relation(fields: [propertyId], references: [id])
+  createdAt     DateTime  @default(now())
+  logs          Logs[]
+}
+
+model Customer {
+  id            String  @id @default(uuid())
+  rents         Rent[]
+  bookings      Booking[]
+  details       Customer_details?
+  password      Password?
+  createdAt     DateTime  @default(now())
+  logs          Logs[]
+}
+
+model Customer_details {
+  id            String  @id @default(uuid())
+  customerId    String  @unique
+  customer      Customer?  @relation(fields: [customerId], references: [id])
+  firstname     String
+  firstname_hash    String
+  lastname      String
+  lastname_hash     String
+  email         String
+  email_hash    String
+  contact       String
+  contact_hash  String
+  gender        String
+  gender_hash   String
+  document_number  String
+  logs          Customer_details_log[]
+  updatedAt     DateTime @updatedAt
+  createdAt     DateTime  @default(now())
+} 
+
+model Customer_details_log {
+    id          Int     @id @default(autoincrement())
+    prev_data     Json
+    new_data      Json
+    customer_detailsId  String
+    customer_details    Customer_details  @relation(fields: [customer_detailsId], references: [id])  
+    createdAt     DateTime  @default(now())
+    user_data     Json    //data of the user who registers the log
+}
+
+model Password {
+  id            String  @id @default(uuid())
+  value         String
+  userId        String    @unique
+  user          User    @relation(fields: [userId], references: [id])
+  customerId    String    @unique
+  customer      Customer    @relation(fields: [customerId], references: [id])
+  logs          Password_logs[]
+  createdAt     DateTime  @default(now())
+}
+
+model Password_logs {
+  id            Int     @id @default(autoincrement())
+  passwordId    String
+  password      Password    @relation(fields: [passwordId], references: [id])
+  prev_data     String
+  new_data      String
+  createdAt     DateTime  @default(now())
+}
+
+
+
+//add a scoring for customer so we know who pays well and who we must follow, reward, leave or block
+//the app should send email, whatsapp, telegram or sms alerts
+//we must know for each property who rent, rented, bought it, for each registered customer we will know how much he paid, have to pay, at which frequency
+enum Rent_status {
+    Active  
+    Inactive   
+}
+model Rent { //for rent
+  id            String  @id @default(uuid())
+  customerId    String
+  customer      Customer    @relation(fields: [customerId], references: [id])
+  propertyId    String
+  property      Property    @relation(fields: [propertyId], references: [id])
+  sub_propertyId  String
+  sub_property  Sub_property    @relation(fields: [sub_propertyId], references: [id])
+  status        Rent_status
+  comment       String
+  start         DateTime
+  end           DateTime
+  createdAt     DateTime  @default(now())
+  logs          Logs[]
+}
+
+enum Booking_status {
+    Active  
+    Canceled    
+    Inactive    
+    Scheduled   
+}
+model Booking { //for booking
+  id            String  @id @default(uuid())
+  customerId    String
+  customer      Customer    @relation(fields: [customerId], references: [id])
+  propertyId    String
+  property      Property    @relation(fields: [propertyId], references: [id])
+  sub_propertyId  String
+  sub_property  Sub_property    @relation(fields: [sub_propertyId], references: [id])
+  status        Booking_status 
+  comment       String
+  start         DateTime
+  end           DateTime
+  logs          Logs[]
+  createdAt     DateTime    @default(now())
+}
+
+model Logs {
+  id            String  @id @default(uuid())
+  user_data     Json //the data of the user who registers the logs
+  prev_data     Json
+  new_data      Json
+  countryId     String
+  country       Country @relation(fields: [countryId], references: [id])
+  municipalityId  String
+  municipality   Municipality @relation(fields: [municipalityId], references: [id])
+  customerId  String
+  customer   Customer @relation(fields: [customerId], references: [id])
+  propertyId  String
+  property   Property @relation(fields: [propertyId], references: [id])
+  sub_propertyId    String
+  sub_property   Sub_property @relation(fields: [sub_propertyId], references: [id])
+  rentId   String
+  rent   Rent @relation(fields: [rentId], references: [id])
+  bookingId   String
+  booking   Booking @relation(fields: [bookingId], references: [id])
+  property_typeId   String
+  property_type   Property_type @relation(fields: [property_typeId], references: [id])
+  property_categoryId   String
+  property_category   Property_category @relation(fields: [property_categoryId], references: [id])
+  userId    String
+  user   User @relation(fields: [userId], references: [id])
+  roleId    String
+  role      Role    @relation(fields: [roleId], references: [id]) 
+  createdAt   DateTime  @default(now())
+}
