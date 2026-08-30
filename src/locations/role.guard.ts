@@ -1,0 +1,1 @@
+//Guard for location controller, only superadmin and admin can access

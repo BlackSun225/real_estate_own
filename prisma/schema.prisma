@@ -44,7 +44,7 @@ model User {
 model Continent {
   id            String  @id @default(uuid())
   name          String
-  comment       String
+  comment       String?
   countries     Country[]
   createdAt     DateTime @default(now())
 }
@@ -52,7 +52,7 @@ model Continent {
 model Country {
   id            String  @id @default(uuid())
   name          String
-  comment       String
+  comment       String?
   continentId   String
   continent     Continent  @relation(fields: [continentId], references: [id])
   municipalities  Municipality[]
@@ -63,12 +63,11 @@ model Country {
 model Municipality {
   id            String  @id @default(uuid())
   name          String
-  comment       String
+  comment       String?
   countryId     String
   country       Country @relation(fields: [countryId], references: [id])
   properties    Property[]
   createdAt     DateTime  @default(now())
-  createdBy     String
   logs          Logs[]
 }
 
@@ -86,7 +85,6 @@ model Property_type {
   categories    Property_category[]
   logs          Logs[]
   createdAt     DateTime  @default(now())
-  createdBy     String
 }
 
 model Property_category {
@@ -99,7 +97,6 @@ model Property_category {
   sub_properties    Sub_property[]
   logs          Logs[]
   createdAt     DateTime  @default(now())
-  createdBy     String
 }
 
 enum Property_status {
@@ -215,7 +212,7 @@ model Rent { //for rent
   sub_propertyId  String
   sub_property  Sub_property    @relation(fields: [sub_propertyId], references: [id])
   status        Rent_status
-  comment       String
+  comment       String?
   start         DateTime
   end           DateTime
   createdAt     DateTime  @default(now())
@@ -237,7 +234,7 @@ model Booking { //for booking
   sub_propertyId  String
   sub_property  Sub_property    @relation(fields: [sub_propertyId], references: [id])
   status        Booking_status 
-  comment       String
+  comment       String?
   start         DateTime
   end           DateTime
   logs          Logs[]
