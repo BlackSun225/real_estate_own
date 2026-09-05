@@ -8,7 +8,7 @@ import { PrismaService } from '../prisma.service';
 export class LocationsService {
     constructor(private prisma: PrismaService) {}
 
-    async locations(): Promise<Continent[]> {
+    async locations(): Promise<{status: true, data: Continent[]}> {
         const result = await this.prisma.continent.findMany({
             include: {
                 countries: {
@@ -19,7 +19,10 @@ export class LocationsService {
             }
         })
 
-        return result;
+        return {
+            status: true,
+            data: result
+        };
     }
 
     async createContinent(data: {name: string, comment?: string}): Promise<{
