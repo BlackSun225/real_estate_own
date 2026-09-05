@@ -21,21 +21,23 @@ enum Role_name {
     Manager
 }
 
-model Role {
-  id            String @id @default(uuid())
-  name          Role_name
-  users         User[]
-  logs          Logs[]
-  createdAt     DateTime  @default(now())
-}
+// model Role {
+//   id            String @id @default(uuid())
+//   name          Role_name
+//   users         User[]
+//   logs          Logs[]
+//   createdAt     DateTime  @default(now())
+// }
 
 model User {
   id            String @id @default(uuid())
   firstname     String
   lastname      String
-  email         String
-  roleId        String
-  role          Role    @relation(fields: [roleId], references: [id])
+  email         String  @unique
+  contact       String  @unique
+  role          Role_name
+//   roleId        String
+//   role          Role    @relation(fields: [roleId], references: [id])
   password      Password?
   logs          Logs[]
   createdAt     DateTime  @default(now())
@@ -152,13 +154,13 @@ model Customer_details {
   firstname_hash    String
   lastname      String
   lastname_hash     String
-  email         String
-  email_hash    String
-  contact       String
-  contact_hash  String
+  email         String 
+  email_hash    String  @unique
+  contact       String  
+  contact_hash  String  @unique
   gender        String
   gender_hash   String
-  document_number  String
+  document_number  String   @unique
   logs          Customer_details_log[]
   updatedAt     DateTime @updatedAt
   createdAt     DateTime  @default(now())
@@ -177,10 +179,10 @@ model Customer_details_log {
 model Password {
   id            String  @id @default(uuid())
   value         String
-  userId        String    @unique
-  user          User    @relation(fields: [userId], references: [id])
-  customerId    String    @unique
-  customer      Customer    @relation(fields: [customerId], references: [id])
+  userId        String?    @unique
+  user          User?    @relation(fields: [userId], references: [id])
+  customerId    String?    @unique
+  customer      Customer?    @relation(fields: [customerId], references: [id])
   logs          Password_logs[]
   createdAt     DateTime  @default(now())
 }
@@ -266,7 +268,7 @@ model Logs {
   property_category   Property_category @relation(fields: [property_categoryId], references: [id])
   userId    String
   user   User @relation(fields: [userId], references: [id])
-  roleId    String
-  role      Role    @relation(fields: [roleId], references: [id]) 
+//   roleId    String
+//   role      Role    @relation(fields: [roleId], references: [id]) 
   createdAt   DateTime  @default(now())
 }

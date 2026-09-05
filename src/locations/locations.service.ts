@@ -68,7 +68,9 @@ export class LocationsService {
         }
     }
 
-    async deleteContinent(id: string) {
+    async deleteContinent(id: string): Promise<{
+        status: boolean, data?: Continent, error?: string
+    }> {
         try {
             const checkContinent = await this.prisma.continent.findUnique({where: {id}});
 
@@ -91,12 +93,17 @@ export class LocationsService {
     }
 
 
-    async countries(): Promise<Country[]> {
-        return this.prisma.country.findMany({
+    async countries(): Promise<{status: boolean, data: Country[]}> {
+        const result = await this.prisma.country.findMany({
             include: {
                 municipalities: true
             }
         });
+
+        return {
+            status: true,
+            data: result
+        }
     }
 
     async createCountry(data: {name: string, comment?: string, continentId: string}): Promise<{
@@ -165,14 +172,17 @@ export class LocationsService {
     }
 
 
-    async municipalities(): Promise<Municipality[]> {
-        const result = this.prisma.municipality.findMany({
+    async municipalities(): Promise<{status: boolean, data: Municipality[]}> {
+        const result = await this.prisma.municipality.findMany({
             include: {
                 country: true
             }
         });
 
-        return result;
+        return {
+            status: true,
+            data: result
+        };
     }
 
     async createMunicipality(data: {name: string, comment?: string, countryId: string}): Promise<{
