@@ -1,7 +1,7 @@
 import { Body, Controller, Param} from '@nestjs/common';
 import { LocationsService } from './locations.service';
 import { Get, Post, Patch, Delete } from '@nestjs/common';
-import { CreateContinentDto, CreateCountryDto, CreateMunicipalityDto, UpdateContinentDto, UpdateCountryDto, UpdateMunicipalityDto } from './create-location.dto';
+import { CreateContinentDto, CreateCountryDto, CreateMunicipalityDto, UpdateContinentDto, UpdateCountryDto, UpdateMunicipalityDto } from './location.dto';
 
 
 @Controller('locations')

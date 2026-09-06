@@ -39,6 +39,8 @@ model User {
 //   roleId        String
 //   role          Role    @relation(fields: [roleId], references: [id])
   password      Password?
+  authenticated Authenticated[]
+  auth_logs     Authenticated_logs[]
   logs          Logs[]
   createdAt     DateTime  @default(now())
 }
@@ -142,6 +144,8 @@ model Customer {
   bookings      Booking[]
   details       Customer_details?
   password      Password?
+  authenticated Authenticated[]
+  auth_logs     Authenticated_logs[]
   createdAt     DateTime  @default(now())
   logs          Logs[]
 }
@@ -196,6 +200,26 @@ model Password_logs {
   createdAt     DateTime  @default(now())
 }
 
+
+model Authenticated {
+    id          Int    @id @default(autoincrement())
+    token       String
+    user        User    @relation(fields: [userId], references: [id])
+    userId      String
+    customer    Customer    @relation(fields: [customerId], references: [id])
+    customerId  String
+    createdAt   DateTime  @default(now())
+}
+
+model Authenticated_logs {
+    id          Int    @id @default(autoincrement())
+    action      String
+    user        User    @relation(fields: [userId], references: [id])
+    userId      String
+    customer    Customer    @relation(fields: [customerId], references: [id])
+    customerId  String
+    createdAt   DateTime  @default(now())
+}
 
 
 //add a scoring for customer so we know who pays well and who we must follow, reward, leave or block
