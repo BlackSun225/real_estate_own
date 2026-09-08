@@ -12,6 +12,4 @@ export class AuthController {
     userIn(@Body() data: {email: string, password: string}) {
         return this.authService.userLogin(data);
     }
-
-    
 }
