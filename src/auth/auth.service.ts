@@ -59,7 +59,7 @@ export class AuthService {
                 }
             });
 
-            if(checkTokenInDb) {
+            if(!checkTokenInDb) {
                 return {
                     status: false,
                     message: "You aren't connected"
@@ -69,7 +69,6 @@ export class AuthService {
             await this.prisma.authenticated.delete({
                 where: {token, userId}
             });
-
 
         }catch(error) {
             throw new InternalServerErrorException(`Logout user : ${error}`)
