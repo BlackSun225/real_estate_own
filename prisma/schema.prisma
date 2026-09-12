@@ -113,7 +113,7 @@ model Property {
   id            String  @id @default(uuid())
   name          String
   area          String
-  status        Property_status
+  status        Property_status 
   rents         Rent[]
   bookings      Booking[]
   categoryId    String
